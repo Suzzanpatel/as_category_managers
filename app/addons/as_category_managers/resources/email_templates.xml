@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<email_templates scheme="1.0">
+    <templates>
+        <item>
+            <code><![CDATA[as_category_managers_added_product]]></code>
+            <area><![CDATA[A]]></area>
+            <status><![CDATA[A]]></status>
+            <subject/>
+            <default_subject><![CDATA[{{ subject }}]]></default_subject>
+            <template/>
+            <default_template><![CDATA[{{ snippet("header") }}
+                {{ __("hello") }}, {{ fullname }} <br /><br />
+
+                {{ __("as_category_managers.added_product.waits_for_approval", {"[product_name]": product_name}) }} <br />
+                {{ __("as_category_managers.added_product.please_go_to_link_below") }} <br /><br />
+                {{ __("as_category_managers.added_product.action", {"[url]": url}) }} <br /><br />
+
+                {{ snippet("footer") }}]]>
+            </default_template>
+            <params_schema/>
+            <params/>
+            <addon><![CDATA[as_category_managers]]></addon>
+        </item>
+    </templates>
+</email_templates>

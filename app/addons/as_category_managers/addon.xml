@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<addon scheme="3.0">
+    <id>as_category_managers</id>
+    <name>ArenaSoftwareS: Category Managers</name>
+    <version>1.0</version>
+    <priority>10</priority>
+    <position>20</position>
+    <default_language>en</default_language>
+    <compatibility>
+        <dependencies>vendor_data_premoderation</dependencies>
+    </compatibility>
+    <auto_install>MULTIVENDOR,ULTIMATE</auto_install>
+    <status>active</status>
+    <has_icon>Y</has_icon>
+
+    <supplier>ArenaSoftwareS</supplier>
+    <supplier_link>https://arenasoftwares.com</supplier_link>
+    <author>
+        <name>arenasoftwares.com</name>
+        <url>http://arenasoftwares.com</url>
+        <email>support@arenasoftwares.com</email>
+    </author>
+
+    <queries>
+        <item for="install">ALTER TABLE ?:users ADD is_cm_user CHAR(1) NOT NULL DEFAULT 'N';</item>
+        <item for="uninstall">ALTER TABLE ?:users DROP is_cm_user;</item>
+
+        <item for="install">ALTER TABLE ?:users ADD is_cm_leader CHAR(1) NOT NULL DEFAULT 'N';</item>
+        <item for="uninstall">ALTER TABLE ?:users DROP is_cm_leader;</item>
+
+        <item for="install">ALTER TABLE ?:users ADD cm_member_ids TEXT DEFAULT '';</item>
+        <item for="uninstall">ALTER TABLE ?:users DROP cm_member_ids;</item>
+
+        <item for="install">ALTER TABLE ?:users ADD cm_category_ids TEXT DEFAULT '';</item>
+        <item for="uninstall">ALTER TABLE ?:users DROP cm_category_ids;</item>
+    </queries>
+
+    <functions>
+        <item for="install">fn_as_category_managers_install</item>
+        <item for="uninstall">fn_as_category_managers_uninstall</item>
+    </functions>
+
+    <email_templates type="file">resources/email_templates.xml</email_templates>
+</addon>

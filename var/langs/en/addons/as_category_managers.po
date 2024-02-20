@@ -1,0 +1,73 @@
+msgid ""
+msgstr "Project-Id-Version: tygh\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language-Team: English\n"
+"Language: en_US"
+
+msgctxt "Addons::name::as_category_managers"
+msgid "ArenaSoftwareS: Category Managers"
+msgstr "ArenaSoftwareS: Category Managers"
+
+msgctxt "Addons::description::as_category_managers"
+msgid "ArenaSoftwareS: Category Managers"
+msgstr "ArenaSoftwareS: Category Managers"
+
+msgctxt "Languages::as_category_managers.category_manager"
+msgid "Category Manager"
+msgstr "Category Manager"
+
+msgctxt "Languages::as_category_managers.category_managers"
+msgid "Category Managers"
+msgstr "Category Managers"
+
+msgctxt "Languages::as_category_managers.add_administrator"
+msgid "Add Administrator"
+msgstr "Add Administrator"
+
+msgctxt "Languages::as_category_managers.cm_user"
+msgid "CM User"
+msgstr "CM User"
+
+msgctxt "Languages::as_category_managers.cm_leader"
+msgid "CM Leader"
+msgstr "CM Leader"
+
+msgctxt "Languages::as_category_managers.add_cm_user"
+msgid "Add Category Manager"
+msgstr "Add Category Manager"
+
+msgctxt "Languages::as_category_managers.cm_user_type"
+msgid "CM User Type"
+msgstr "CM User Type"
+
+msgctxt "Languages::as_category_managers.is_leader"
+msgid "Is Leader"
+msgstr "Is Leader"
+
+msgctxt "Languages::as_category_managers.members"
+msgid "Members"
+msgstr "Members"
+
+msgctxt "Languages::as_category_managers.assign_categories_to_cm"
+msgid "Assign Categories to CM"
+msgstr "Assign Categories to CM"
+
+msgctxt "Languages::as_category_managers.event.added_product"
+msgid "Product added to category"
+msgstr "Product added to category"
+
+msgctxt "Languages::as_category_managers.added_product.waits_for_approval"
+msgid "\"[product_name]\" product await your approval."
+msgstr "\"[product_name]\" product await your approval."
+
+msgctxt "Languages::as_category_managers.added_product.please_go_to_link_below"
+msgid "Please go to the link below to view the pending products."
+msgstr "Please go to the link below to view the pending products."
+
+msgctxt "Languages::as_category_managers.added_product.action"
+msgid "<a href=\"[url]\" target=\"_blank\">View pending products</a>"
+msgstr "<a href=\"[url]\" target=\"_blank\">View pending products</a>"
+
+msgctxt "Languages::as_category_managers.cm_member_ids_error.cannot_assign_yourself"
+msgid "You cannot assign yourself as a member of yourself"
+msgstr "You cannot assign yourself as a member of yourself"

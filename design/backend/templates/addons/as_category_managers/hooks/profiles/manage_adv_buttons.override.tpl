@@ -6,6 +6,7 @@
             {capture name="dropdown_list"}
                 <li>{btn type="list" text=__("add_administrator") href="{"profiles.add?user_type=`$user_type_request`"|fn_url}"}</li>
                 <li>{btn type="list" text=__("as_category_managers.add_cm_user") href="{"profiles.add?user_type=`$user_type_request`&is_cm_user=Y"|fn_url}"}</li>
+                {hook name="as_cm_profiles:manage_adv_buttons_dropdown_list"}{/hook}
                 {$smarty.capture.tools_list_items nofilter}
             {/capture}
             {dropdown content=$smarty.capture.dropdown_list icon="icon-plus" no_caret=true placement="right"}

@@ -11,5 +11,9 @@ fn_register_hooks(
     'update_profile',
     'get_categories',
     'get_products_before_select',
+    'shippings_group_products_list',
+    'pre_place_order',
+    'create_order_details',
+    'get_orders',
     'vendor_data_premoderation_request_approval_for_products_pre',
 );

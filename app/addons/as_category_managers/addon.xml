@@ -33,6 +33,9 @@
 
         <item for="install">ALTER TABLE ?:users ADD cm_category_ids TEXT DEFAULT '';</item>
         <item for="uninstall">ALTER TABLE ?:users DROP cm_category_ids;</item>
+
+        <item for="install">ALTER TABLE ?:order_details ADD product_main_category_id TEXT DEFAULT '';</item>
+        <item for="uninstall">ALTER TABLE ?:order_details DROP product_main_category_id;</item>
     </queries>
 
     <functions>

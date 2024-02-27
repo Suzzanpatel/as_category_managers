@@ -19,6 +19,12 @@ function fn_as_category_managers_install()
             "type" => "A",
             "status" => "A",
             "privileges" => [
+                "edit_order" => "Y",
+                "update_order_details" => "Y",
+                "delete_orders" => "Y",
+                "change_order_status" => "Y",
+                "create_order" => "Y",
+                "view_orders" => "Y",
                 "manage_catalog" => "Y",
                 "view_catalog" => "Y",
                 "manage_product_premoderation" => "Y",
@@ -311,4 +317,156 @@ function fn_as_category_managers_get_already_assigned_member_ids() : array
     }
 
     return $already_assigned_member_ids;
+}
+
+function fn_as_category_managers_shippings_group_products_list(&$products, &$groups)
+{
+    $categories_groups = array();
+    foreach ($groups as $group) {
+        foreach ($group['products'] as $cart_id => $product) {
+            $main_category_id = fn_get_product_main_category_id($product['product_id']);
+            $category_name = fn_get_category_name($main_category_id);
+            $categories_group_key = $main_category_id ? $group['company_id'] . "_" . $main_category_id : $group['company_id'];
+
+            if (empty($categories_groups[$categories_group_key]) && $main_category_id) {
+                $categories_groups[$categories_group_key] = $group;
+                $categories_groups[$categories_group_key]['main_category_id'] = $main_category_id;
+                $categories_groups[$categories_group_key]['name'] = $group['name'] . ' (' . $category_name . ')';
+
+                if (fn_allowed_for('ULTIMATE')) {
+                    $categories_groups[$categories_group_key]['name'] = $category_name;
+                }
+
+                $categories_groups[$categories_group_key]['products'] = array();
+            }
+
+            if (empty($categories_groups[$categories_group_key]) && !$main_category_id) {
+                $categories_groups[$categories_group_key] = $group;
+                $categories_groups[$categories_group_key]['products'] = array();
+            }
+
+            $categories_groups[$categories_group_key]['products'][$cart_id] = $product;
+            $categories_groups[$categories_group_key]['group_key'] = $categories_group_key;
+        }
+    }
+
+    ksort($categories_groups);
+    $groups = array_values($categories_groups);
+}
+
+function fn_as_category_managers_pre_place_order(&$cart, &$allow, &$product_groups)
+{
+    // products from different categories must have different group keys when placing suborders
+    $new_product_groups = array();
+    foreach ($product_groups as $key_group => $group) {
+        if (empty($new_product_groups[$group['company_id']])) {
+            $new_product_groups[$group['company_id']] = $group;
+            $new_product_groups[$group['company_id']]['name'] = fn_get_company_name($group['company_id']);
+            $new_product_groups[$group['company_id']]['products'] = array();
+            $new_product_groups[$group['company_id']]['chosen_shippings'] = array();
+            if (!empty($group['main_category_id'])) {
+                unset($new_product_groups[$group['company_id']]['main_category_id']);
+            }
+        }
+
+        if (!empty($group['main_category_id'])) {
+            foreach ($group['products'] as $cart_id => $product) {
+                $group['products'][$cart_id]['extra']['main_category_id'] = $group['main_category_id'];
+                $cart['products'][$cart_id]['extra']['main_category_id'] = $group['main_category_id'];
+            }
+        }
+
+        $supplier_groups = array();
+        foreach ($group['products'] as $cart_id => $product) {
+            if (!empty($cart['parent_order_id']) && isset($product['extra']['main_category_id'])) {
+                $main_category_id = $product['extra']['main_category_id'];
+                if (!isset($supplier_groups[$main_category_id])) {
+                    $supplier_groups[$main_category_id] = count($supplier_groups);
+                }
+                $group['products'][$cart_id]['extra']['group_key'] = $supplier_groups[$main_category_id];
+                $cart['products'][$cart_id]['extra']['group_key'] = $supplier_groups[$main_category_id];
+            } else {
+                $group['products'][$cart_id]['extra']['group_key'] = $key_group;
+                $cart['products'][$cart_id]['extra']['group_key'] = $key_group;
+            }
+        }
+
+        if (!empty($group['chosen_shippings'])) {
+            if (!empty($cart['parent_order_id'])) {
+                $group['chosen_shippings'][0]['group_key'] = $key_group;
+            }
+            if (empty($group['chosen_shippings'][0]['group_name'])) {
+                $group['chosen_shippings'][0]['group_name'] = $group['name'];
+            }
+            $new_product_groups[$group['company_id']]['shippings'][$group['chosen_shippings'][0]['shipping_id']] = $group['chosen_shippings'][0];
+            $new_product_groups[$group['company_id']]['chosen_shippings'] = array_merge($new_product_groups[$group['company_id']]['chosen_shippings'], $group['chosen_shippings']);
+        }
+        $new_product_groups[$group['company_id']]['products'] = $new_product_groups[$group['company_id']]['products'] + $group['products'];
+    }
+
+    $product_groups = array_values($new_product_groups);
+
+
+    // Create new product groups based on main category
+    $categories_groups = array();
+    foreach ($product_groups as $group) {
+        foreach ($group['products'] as $cart_id => $product) {
+            $main_category_id = fn_get_product_main_category_id($product['product_id']);
+            $category_name = fn_get_category_name($main_category_id);
+            $categories_group_key = $main_category_id ? $group['company_id'] . "_" . $main_category_id : $group['company_id'];
+
+            if (empty($categories_groups[$categories_group_key]) && $main_category_id) {
+                $categories_groups[$categories_group_key] = $group;
+                $categories_groups[$categories_group_key]['main_category_id'] = $main_category_id;
+                $categories_groups[$categories_group_key]['name'] = $group['name'] . ' (' . $category_name . ')';
+
+                if (fn_allowed_for('ULTIMATE')) {
+                    $categories_groups[$categories_group_key]['name'] = $category_name;
+                }
+
+                $categories_groups[$categories_group_key]['products'] = array();
+            }
+
+            if (empty($categories_groups[$categories_group_key]) && !$main_category_id) {
+                $categories_groups[$categories_group_key] = $group;
+                $categories_groups[$categories_group_key]['products'] = array();
+            }
+
+            $categories_groups[$categories_group_key]['products'][$cart_id] = $product;
+            $categories_groups[$categories_group_key]['group_key'] = $categories_group_key;
+        }
+    }
+
+    ksort($categories_groups);
+    $product_groups = array_values($categories_groups);
+}
+
+function fn_as_category_managers_create_order_details($order_id, &$cart, &$order_details, $extra)
+{
+    $product_id = $order_details['product_id'];
+
+    // Add product_main_category_id to order_details
+    $product_main_category_id = fn_get_product_main_category_id($product_id);
+    $order_details['product_main_category_id'] = $product_main_category_id;
+}
+
+function fn_as_category_managers_get_orders($params, $fields, $sortings, &$condition, &$join, &$group)
+{
+    $is_cm_user = fn_as_category_managers_get_cm_user_data()['is_cm_user'] ?? false;
+
+    if ($is_cm_user == "Y") {
+        $category_ids = fn_as_category_managers_get_cm_user_data()['cm_category_ids'] ?? 0;
+
+        // If category_ids is not empty
+        if (!empty($category_ids)) {
+            $category_ids = explode(",", $category_ids);
+            $condition .= db_quote(" AND ?:order_details.product_main_category_id IN (?a)", $category_ids);
+        } else {
+            $condition .= db_quote(" AND ?:order_details.product_main_category_id = 0");
+        }
+
+        $join .= " LEFT JOIN ?:order_details ON ?:order_details.order_id = ?:orders.order_id";
+
+        $group .= " GROUP BY ?:orders.order_id";
+    }
 }

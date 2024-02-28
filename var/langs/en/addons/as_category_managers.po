@@ -52,6 +52,10 @@ msgctxt "Languages::as_category_managers.assign_categories_to_cm"
 msgid "Assign Categories to CM"
 msgstr "Assign Categories to CM"
 
+msgctxt "Languages::as_category_managers.assign_order_to_member"
+msgid "Assign Order to Member"
+msgstr "Assign Order to Member"
+
 msgctxt "Languages::as_category_managers.event.added_product"
 msgid "Product added to category"
 msgstr "Product added to category"

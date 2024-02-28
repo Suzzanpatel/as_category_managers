@@ -63,6 +63,7 @@ function fn_as_category_managers_get_cm_user_data() : array
 function fn_as_category_managers_fill_auth(&$auth, &$user_data, &$area, &$original_auth)
 {
     $auth['is_cm_user'] = $user_data['is_cm_user'] ?? false;
+    $auth['is_cm_leader'] = $user_data['is_cm_leader'] ?? false;
     $auth['cm_category_ids'] = $user_data['cm_category_ids'] ?? [];
 }
 
@@ -452,21 +453,27 @@ function fn_as_category_managers_create_order_details($order_id, &$cart, &$order
 
 function fn_as_category_managers_get_orders($params, $fields, $sortings, &$condition, &$join, &$group)
 {
-    $is_cm_user = fn_as_category_managers_get_cm_user_data()['is_cm_user'] ?? false;
+    $cm_user_data = fn_as_category_managers_get_cm_user_data();
+    $is_cm_user = $cm_user_data['is_cm_user'] ?? false;
+    $is_cm_leader = $cm_user_data['is_cm_leader'] ?? false;
 
     if ($is_cm_user == "Y") {
-        $category_ids = fn_as_category_managers_get_cm_user_data()['cm_category_ids'] ?? 0;
+        if ($is_cm_leader == "Y") {
+            $category_ids = $cm_user_data['cm_category_ids'] ?? 0;
 
-        // If category_ids is not empty
-        if (!empty($category_ids)) {
-            $category_ids = explode(",", $category_ids);
-            $condition .= db_quote(" AND ?:order_details.product_main_category_id IN (?a)", $category_ids);
+            // If category_ids is not empty
+            if (!empty($category_ids)) {
+                $category_ids = explode(",", $category_ids);
+                $condition .= db_quote(" AND ?:order_details.product_main_category_id IN (?a)", $category_ids);
+            } else {
+                $condition .= db_quote(" AND ?:order_details.product_main_category_id = 0");
+            }
+    
+            $join .= " LEFT JOIN ?:order_details ON ?:order_details.order_id = ?:orders.order_id";
+    
+            $group .= " GROUP BY ?:orders.order_id";
         } else {
-            $condition .= db_quote(" AND ?:order_details.product_main_category_id = 0");
+            $condition .= db_quote(" AND ?:orders.assigned_cm_member_id = ?i", Tygh::$app['session']['auth']['user_id']);
         }
-
-        $join .= " LEFT JOIN ?:order_details ON ?:order_details.order_id = ?:orders.order_id";
-
-        $group .= " GROUP BY ?:orders.order_id";
     }
 }

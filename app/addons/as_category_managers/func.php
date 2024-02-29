@@ -40,8 +40,8 @@ function fn_as_category_managers_uninstall()
     // Delete usergroup
     $cm_usergroup_id = db_get_row("SELECT usergroup_id FROM ?:usergroup_descriptions WHERE usergroup = ?s", "Addon: Category Manager");
 
-    if (fn_is_usergroup_exists($cm_usergroup_id['usergroup_id'])) {
-        fn_delete_usergroups($cm_usergroup_id['usergroup_id']);
+    if (!empty($cm_usergroup_id) && fn_is_usergroup_exists($cm_usergroup_id['usergroup_id'])) {
+        fn_delete_usergroups(explode(",", $cm_usergroup_id['usergroup_id']));
     }
 }
 
@@ -234,14 +234,16 @@ function fn_as_category_managers_get_products_before_select (
         $controller = Registry::get('runtime.controller');
         $mode = Registry::get('runtime.mode');
 
-        $category_ids = fn_as_category_managers_get_cm_user_data()['cm_category_ids'] ?? 0;
-
-        // If category_ids is not empty
-        if (!empty($category_ids)) {
-            $category_ids = explode(",", $category_ids);
-            $params['cid'] = $category_ids;
-        } else {
-            $params['cid'] = [0];
+        if (!isset($params['cid'])) {
+            $category_ids = fn_as_category_managers_get_cm_user_data()['cm_category_ids'] ?? 0;
+    
+            // If category_ids is not empty
+            if (!empty($category_ids)) {
+                $category_ids = explode(",", $category_ids);
+                $params['cid'] = $category_ids;
+            } else {
+                $params['cid'] = [0];
+            }
         }
 
         if ($controller == "categories" && $mode == "manage") {

@@ -289,6 +289,95 @@ function fn_as_category_managers_vendor_data_premoderation_request_approval_for_
     }
 }
 
+function fn_as_category_managers_vendor_data_premoderation_approve_products_pre($product_ids, $update_product)
+{
+    // If CS-Cart version is 4.17.1 or higher, return true
+    if (version_compare(PRODUCT_VERSION, '4.17.1', '>=')) {
+        return true;
+    }
+
+    $current_product_statuses = fn_vendor_data_premoderation_get_current_product_statuses($product_ids);
+    $updated_product_ids = [];
+
+    foreach ($current_product_statuses as $product_id => $status) {
+        if ($status !== ProductStatuses::REQUIRES_APPROVAL
+            && $status !== ProductStatuses::DISAPPROVED
+        ) {
+            continue;
+        }
+
+        $updated_product_ids[] = $product_id;
+    }
+
+    if ($updated_product_ids) {
+        /** @var \Tygh\Notifications\EventDispatcher $event_dispatcher */
+        $event_dispatcher = Tygh::$app['event.dispatcher'];
+
+        $products_companies = fn_get_company_ids_by_product_ids($updated_product_ids);
+        foreach ($products_companies as $company_id => $company_product_ids) {
+            $event_dispatcher->dispatch('as_category_managers.product_status.approved', [
+                'company_id'    => $company_id,
+                'to_company_id' => $company_id,
+                'product_ids'   => $company_product_ids,
+            ]);
+        }
+    }
+
+    return true;
+}
+
+function fn_as_category_managers_vendor_data_premoderation_disapprove_products_pre($product_ids, $update_product, $reason)
+{
+    // If CS-Cart version is 4.17.1 or higher, return true
+    if (version_compare(PRODUCT_VERSION, '4.17.1', '>=')) {
+        return true;
+    }
+    
+    $current_product_statuses = fn_vendor_data_premoderation_get_current_product_statuses($product_ids);
+    $updated_product_ids = [];
+
+    foreach ($current_product_statuses as $product_id => $status) {
+        $update_premoderation = true;
+
+        if ($status === ProductStatuses::DISAPPROVED
+            || $status === ProductStatuses::REQUIRES_APPROVAL
+        ) {
+            $current_premoderation = fn_vendor_data_premoderation_get_premoderation([$product_id]);
+            $current_premoderation = reset($current_premoderation);
+
+            $original_reason = $current_premoderation
+                ? $current_premoderation['reason']
+                : '';
+
+            $is_reason_changed = $reason !== $original_reason;
+            $is_product_disapproved = $status === ProductStatuses::REQUIRES_APPROVAL;
+
+            $update_premoderation = !$current_premoderation || $is_reason_changed || $is_product_disapproved;
+        }
+
+        if ($update_premoderation) {
+            $updated_product_ids[] = $product_id;
+        }
+    }
+
+    if ($updated_product_ids) {
+        /** @var \Tygh\Notifications\EventDispatcher $event_dispatcher */
+        $event_dispatcher = Tygh::$app['event.dispatcher'];
+
+        $products_companies = fn_get_company_ids_by_product_ids($updated_product_ids);
+        foreach ($products_companies as $company_id => $company_product_ids) {
+            $event_dispatcher->dispatch('as_category_managers.product_status.disapproved', [
+                'company_id'    => $company_id,
+                'to_company_id' => $company_id,
+                'product_ids'   => $company_product_ids,
+                'reason'        => $reason
+            ]);
+        }
+    }
+
+    return true;
+}
+
 /**
  * Get category managers by category
  * 

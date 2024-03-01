@@ -21,5 +21,41 @@
             <params/>
             <addon><![CDATA[as_category_managers]]></addon>
         </item>
+        <item>
+            <code><![CDATA[as_category_managers_notification]]></code>
+            <area><![CDATA[A]]></area>
+            <status><![CDATA[A]]></status>
+            <default_subject><![CDATA[{% if status == "Y" %}    {% set text_status=__("approved") %}{% else %}    {% set text_status=__("disapproved") %}{% endif %}{{ company_name }}: {{ __("products_approval_status_changed", {"[status]": text_status}) }}]]></default_subject>
+            <default_template><![CDATA[{% if status == "Y" %}
+                {% set text_status=__("approved") %}
+                {% else %}
+                {% set text_status=__("disapproved") %}
+                {% endif %}
+
+                {{ snippet("header") }}
+
+                {{ __("hello") }},<br /><br />
+
+                {% if status == "Y" %}
+                {{ __("products_approval_status_approved") }}<br />
+                {% else %}
+                {{ __("products_approval_status_disapproved") }}<br />
+                {% endif %}
+
+                {% for product in products %}
+                {{ loop.index }}) <a href="{{ product.url }}">{{ product.product }}</a><br />
+                {% endfor %}
+
+                {% if status == "Y" %}
+                <br />{{ __("text_shoppers_can_order_products") }}
+                {% endif %}
+                {% if reason %}
+                <p>{{ reason }}</p>
+                {% endif %}
+
+                {{ snippet("footer") }}]]>
+            </default_template>
+            <addon><![CDATA[as_category_managers]]></addon>
+        </item>
     </templates>
 </email_templates>

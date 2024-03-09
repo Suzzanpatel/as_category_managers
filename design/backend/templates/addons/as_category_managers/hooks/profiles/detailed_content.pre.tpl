@@ -1,4 +1,4 @@
-{if $smarty.request.is_cm_user == "Y" || $user_data.is_cm_user == "Y"}
+{if $smarty.request.is_cm_user == "Y" || ($user_data.is_root == "N" && $user_data.is_cm_user == "Y")}
     {if !$hide_title}
         {include file="common/subheader.tpl" title=__("as_category_managers.cm_user_type") target="#acc_is_cm_leader"}
     {/if}

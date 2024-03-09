@@ -55,7 +55,7 @@ function fn_as_category_managers_get_cm_user_data() : array
     $auth = Tygh::$app['session']['auth'];
     $user_id = $auth['user_id'] ?? 0;
 
-    $cm_user_data = db_get_row("SELECT is_cm_user, is_cm_leader, cm_member_ids, cm_category_ids FROM ?:users WHERE user_id = ?i", $user_id);
+    $cm_user_data = db_get_row("SELECT is_root, is_cm_user, is_cm_leader, cm_member_ids, cm_category_ids FROM ?:users WHERE user_id = ?i", $user_id);
 
     return $cm_user_data;
 }
@@ -169,6 +169,14 @@ function fn_as_category_managers_update_user_pre(&$user_id, &$user_data, &$auth,
 
         return true;
     }
+
+    // Force is_cm_user to N if is_cm_user is empty
+    if ($user_type == 'A' && empty($is_cm_user)) {
+        $user_data['is_cm_user'] = 'N';
+        $user_data['is_cm_leader'] = 'N';
+
+        return true;
+    }
 }
 
 function fn_as_category_managers_update_profile($action, $user_data, $current_user_data)
@@ -201,9 +209,11 @@ function fn_as_category_managers_get_cm_usergroup_id() : int
 
 function fn_as_category_managers_get_categories(&$params, &$join, &$condition, &$fields, &$group_by, &$sortings, &$lang_code)
 {
-    $is_cm_user = fn_as_category_managers_get_cm_user_data()['is_cm_user'] ?? false;
+    $cm_user_data = fn_as_category_managers_get_cm_user_data();
+    $is_root = $cm_user_data['is_root'] ?? false;
+    $is_cm_user = $cm_user_data['is_cm_user'] ?? false;
 
-    if ($is_cm_user == "Y") {
+    if (AREA == 'A' && $is_root == "N" && $is_cm_user == "Y") {
         $category_ids = fn_as_category_managers_get_cm_user_data()['cm_category_ids'] ?? 0;
 
         // If category_ids is not empty
@@ -228,9 +238,11 @@ function fn_as_category_managers_get_products_before_select (
     $lang_code,
     $having
 ) {
-    $is_cm_user = fn_as_category_managers_get_cm_user_data()['is_cm_user'] ?? false;
+    $cm_user_data = fn_as_category_managers_get_cm_user_data();
+    $is_root = $cm_user_data['is_root'] ?? false;
+    $is_cm_user = $cm_user_data['is_cm_user'] ?? false;
     
-    if ($is_cm_user == "Y") {
+    if (AREA == 'A' && $is_root == "N" && $is_cm_user == "Y") {
         $controller = Registry::get('runtime.controller');
         $mode = Registry::get('runtime.mode');
 
@@ -545,10 +557,11 @@ function fn_as_category_managers_create_order_details($order_id, &$cart, &$order
 function fn_as_category_managers_get_orders($params, $fields, $sortings, &$condition, &$join, &$group)
 {
     $cm_user_data = fn_as_category_managers_get_cm_user_data();
+    $is_root = $cm_user_data['is_root'] ?? false;
     $is_cm_user = $cm_user_data['is_cm_user'] ?? false;
     $is_cm_leader = $cm_user_data['is_cm_leader'] ?? false;
 
-    if ($is_cm_user == "Y") {
+    if (AREA == 'A' && $is_root == "N" && $is_cm_user == "Y") {
         if ($is_cm_leader == "Y") {
             $category_ids = $cm_user_data['cm_category_ids'] ?? 0;
 

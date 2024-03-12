@@ -17,6 +17,7 @@ $schema['as_category_managers.product_status.approved'] = [
         'template' => 'vendor_data_premoderation.event.product_status.approved.name',
         'params'   => [],
     ],
+    'data_provider' => [PremoderationDataProvider::class, 'factory'],
     'receivers' => [
         UserTypes::VENDOR => [
             MailTransport::getId()     => MailMessageSchema::create([

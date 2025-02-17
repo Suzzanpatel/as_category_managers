@@ -10,7 +10,9 @@ if ($mode == 'get_member_list') {
     $search_query = isset($_REQUEST['q']) ? $_REQUEST['q'] : null;
 
     $cm_member_ids = fn_as_category_managers_get_member_ids($auth['user_id']);
-    $exclude_user_ids = db_get_fields("SELECT user_id FROM ?:users WHERE user_id NOT IN (?a)", $cm_member_ids);
+    $exclude_user_ids = !empty($cm_member_ids)
+        ? db_get_fields("SELECT user_id FROM ?:users WHERE user_id NOT IN (?a)", $cm_member_ids)
+        : [];
 
     $params = array(
         'area' => 'A',

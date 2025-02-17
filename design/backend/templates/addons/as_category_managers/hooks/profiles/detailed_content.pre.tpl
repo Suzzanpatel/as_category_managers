@@ -20,7 +20,7 @@
         <div class="control-group" id="cm_members_picker_container">
             <label class="control-label">{__("as_category_managers.members")}:</label>
             <div class="controls">
-                {include file="pickers/users/picker.tpl" data_id="return_users" but_meta="btn" picker_for="assign_cm_member" input_name="user_data[cm_member_ids]" item_ids=$user_data.cm_member_ids placement="right"}
+                {include file="pickers/users/picker.tpl" data_id="return_users" but_meta="btn" picker_for="assign_cm_member" input_name="user_data[cm_member_ids]" item_ids="{$user_data.user_id|fn_as_category_managers_get_member_ids:string}" placement="right" extra_url="&leader_id={$user_data.user_id}"}
             </div>
         </div>
     </div>

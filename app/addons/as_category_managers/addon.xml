@@ -28,9 +28,6 @@
         <item for="install">ALTER TABLE ?:users ADD is_cm_leader CHAR(1) NOT NULL DEFAULT 'N';</item>
         <item for="uninstall">ALTER TABLE ?:users DROP is_cm_leader;</item>
 
-        <item for="install">ALTER TABLE ?:users ADD cm_member_ids TEXT DEFAULT '';</item>
-        <item for="uninstall">ALTER TABLE ?:users DROP cm_member_ids;</item>
-
         <item for="install">ALTER TABLE ?:users ADD cm_category_ids TEXT DEFAULT '';</item>
         <item for="uninstall">ALTER TABLE ?:users DROP cm_category_ids;</item>
 
@@ -39,6 +36,15 @@
 
         <item for="install">ALTER TABLE ?:order_details ADD product_main_category_id TEXT DEFAULT '';</item>
         <item for="uninstall">ALTER TABLE ?:order_details DROP product_main_category_id;</item>
+
+        <item for="install">
+            CREATE TABLE `?:cm_members` (  
+                `leader_id` MEDIUMINT UNSIGNED NOT NULL,
+                `member_id` MEDIUMINT UNSIGNED NOT NULL,
+                PRIMARY KEY (`leader_id`, `member_id`) 
+            ) ENGINE=MyISAM DEFAULT CHARSET=UTF8;
+        </item>
+        <item for="uninstall">DROP TABLE `?:cm_members`;</item>
     </queries>
 
     <functions>

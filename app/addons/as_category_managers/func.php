@@ -55,7 +55,7 @@ function fn_as_category_managers_get_cm_user_data() : array
     $auth = Tygh::$app['session']['auth'];
     $user_id = $auth['user_id'] ?? 0;
 
-    $cm_user_data = db_get_row("SELECT is_root, is_cm_user, is_cm_leader, cm_member_ids, cm_category_ids FROM ?:users WHERE user_id = ?i", $user_id);
+    $cm_user_data = db_get_row("SELECT user_id, is_root, is_cm_user, is_cm_leader, cm_category_ids FROM ?:users WHERE user_id = ?i", $user_id);
 
     return $cm_user_data;
 }
@@ -94,9 +94,9 @@ function fn_as_category_managers_get_users_pre(&$params, &$auth, &$items_per_pag
     // For users picker
     if ($controller == "profiles" && $mode == "picker" && $picker_for == "assign_cm_member") {
         // Exclude already assigned member ids
-        $already_assigned_member_ids = fn_as_category_managers_get_already_assigned_member_ids();
-        if (!empty($already_assigned_member_ids)) {
-            $params['exclude_user_ids'] = $already_assigned_member_ids;
+        $member_ids = fn_as_category_managers_get_member_ids($params['leader_id']);
+        if (!empty($member_ids)) {
+            $params['exclude_user_ids'] = $member_ids;
         }
 
         // Change user type to V and C
@@ -122,9 +122,6 @@ function fn_as_category_managers_get_users($params, &$fields, &$sortings, &$cond
 
     // Add `is_cm_leader`
     $fields['is_cm_leader'] = "?:users.is_cm_leader";
-
-    // Add `cm_member_ids`
-    $fields['cm_member_ids'] = "?:users.cm_member_ids";
 
     // Add `cm_category_ids`
     $fields['cm_category_ids'] = "?:users.cm_category_ids";
@@ -154,19 +151,6 @@ function fn_as_category_managers_update_user_pre(&$user_id, &$user_data, &$auth,
         $user_data['is_cm_user'] = 'Y';
         $user_data['is_cm_leader'] = isset($user_data['is_cm_leader']) ? 'Y' : 'N';
 
-        // Reset member's cm_category_ids
-        if ($user_data['is_cm_leader'] == 'Y') {
-            $old_cm_member_ids = db_get_field("SELECT cm_member_ids FROM ?:users WHERE user_id = ?i", $user_id);
-            $cm_member_ids = explode(",", $old_cm_member_ids);
-
-            if (!empty($cm_member_ids)) {
-                foreach ($cm_member_ids as $cm_member_id) {
-                    // Empty the member's cm_category_ids
-                    db_query("UPDATE ?:users SET cm_category_ids = ?s WHERE user_id = ?i", "", $cm_member_id);
-                }
-            }
-        }
-
         return true;
     }
 
@@ -190,12 +174,19 @@ function fn_as_category_managers_update_profile($action, $user_data, $current_us
             $cm_member_ids = explode(",", $user_data['cm_member_ids']);
 
             if (!empty($cm_member_ids)) {
-                foreach ($cm_member_ids as $cm_member_id) {
-                    // Get leader cm_category_ids
-                    $leader_cm_category_ids = $user_data['cm_category_ids'];
+                $old_cm_member_ids = fn_as_category_managers_get_member_ids($user_data['user_id']);
+                $member_to_delete = array_values(array_diff($old_cm_member_ids, $cm_member_ids));
+                $member_to_add = array_values(array_diff($cm_member_ids, $old_cm_member_ids));
 
-                    // Assign leader cm_category_ids to cm_member
-                    db_query("UPDATE ?:users SET cm_category_ids = ?s WHERE user_id = ?i", $leader_cm_category_ids, $cm_member_id);
+                if (!empty($member_to_delete)) {
+                    db_query("DELETE FROM ?:cm_members WHERE leader_id = ?i AND member_id IN (?a)", $user_data['user_id'], $member_to_delete);
+                }
+
+                if (!empty($member_to_add)) {
+                    foreach ($member_to_add as $member_id) {
+                        if (empty($member_id)) continue;
+                        db_query("INSERT INTO ?:cm_members (leader_id, member_id) VALUES (?i, ?i)", $user_data['user_id'], $member_id);
+                    }
                 }
             }
         }
@@ -214,11 +205,11 @@ function fn_as_category_managers_get_categories(&$params, &$join, &$condition, &
     $is_cm_user = $cm_user_data['is_cm_user'] ?? false;
 
     if (AREA == 'A' && $is_root == "N" && $is_cm_user == "Y") {
-        $category_ids = fn_as_category_managers_get_cm_user_data()['cm_category_ids'] ?? 0;
+        $category_ids = fn_as_category_managers_get_category_ids();
 
         // If category_ids is not empty
         if (!empty($category_ids)) {
-            $category_ids = explode(",", $category_ids);
+            // $category_ids = explode(",", $category_ids);
             $condition .= db_quote(" AND ?:categories.category_id IN (?a)", $category_ids);
         } else {
             $condition .= db_quote(" AND ?:categories.category_id = 0");
@@ -247,11 +238,10 @@ function fn_as_category_managers_get_products_before_select (
         $mode = Registry::get('runtime.mode');
 
         if (!isset($params['cid'])) {
-            $category_ids = fn_as_category_managers_get_cm_user_data()['cm_category_ids'] ?? 0;
+            $category_ids = fn_as_category_managers_get_category_ids();
     
             // If category_ids is not empty
             if (!empty($category_ids)) {
-                $category_ids = explode(",", $category_ids);
                 $params['cid'] = $category_ids;
             } else {
                 $params['cid'] = [0];
@@ -409,18 +399,36 @@ function fn_as_category_managers_get_cm_user_by_category($category_id)
  * 
  * @return array
  */
-function fn_as_category_managers_get_already_assigned_member_ids() : array
+function fn_as_category_managers_get_member_ids(int $leader_id, string $return_type = 'array') : array|string
 {
-    $cm_users = db_get_array("SELECT user_id, cm_member_ids FROM ?:users WHERE is_cm_user = 'Y'");
+    $member_list = db_get_fields("SELECT member_id FROM ?:cm_members WHERE leader_id = ?i", $leader_id);
+    return $return_type == 'array' ? $member_list : implode(',', $member_list);
+}
 
-    $already_assigned_member_ids = [];
+function fn_as_category_managers_get_category_ids($return_type = 'array') : array|string
+{
+    $cm_user_data = fn_as_category_managers_get_cm_user_data();
+    $is_root = $cm_user_data['is_root'] ?? false;
+    $is_cm_user = $cm_user_data['is_cm_user'] ?? false;
+    $is_cm_leader = $cm_user_data['is_cm_leader'] ?? false;
+    $category_ids = [];
 
-    foreach ($cm_users as $cm_user) {
-        $cm_member_ids = explode(",", $cm_user['cm_member_ids']);
-        $already_assigned_member_ids = array_merge($already_assigned_member_ids, $cm_member_ids);
+    if ($is_root == "N" && $is_cm_user == "Y") {
+        if ($is_cm_leader == "Y") {
+            $category_ids = $cm_user_data['cm_category_ids'] ?? [];
+            $category_ids = explode(",", $category_ids);
+        } else {
+            $leader_ids = db_get_fields("SELECT leader_id FROM ?:cm_members WHERE member_id = ?i", $cm_user_data['user_id']);
+            foreach ($leader_ids as $leader_id) {
+                $leader_category_ids = db_get_field("SELECT cm_category_ids FROM ?:users WHERE user_id = ?i", $leader_id);
+                $leader_category_ids = explode(",", $leader_category_ids);
+                $category_ids = array_merge($category_ids, $leader_category_ids);
+            }
+        }
     }
 
-    return $already_assigned_member_ids;
+    $category_ids = array_values(array_unique($category_ids));
+    return $return_type == 'array' ? $category_ids : implode(',', $category_ids);
 }
 
 function fn_as_category_managers_shippings_group_products_list(&$products, &$groups)
@@ -563,11 +571,10 @@ function fn_as_category_managers_get_orders($params, $fields, $sortings, &$condi
 
     if (AREA == 'A' && $is_root == "N" && $is_cm_user == "Y") {
         if ($is_cm_leader == "Y") {
-            $category_ids = $cm_user_data['cm_category_ids'] ?? 0;
+            $category_ids = fn_as_category_managers_get_category_ids();
 
             // If category_ids is not empty
             if (!empty($category_ids)) {
-                $category_ids = explode(",", $category_ids);
                 $condition .= db_quote(" AND ?:order_details.product_main_category_id IN (?a)", $category_ids);
             } else {
                 $condition .= db_quote(" AND ?:order_details.product_main_category_id = 0");

@@ -9,8 +9,7 @@ if ($mode == 'get_member_list') {
     $page_size = isset($_REQUEST['page_size']) ? (int) $_REQUEST['page_size'] : 10;
     $search_query = isset($_REQUEST['q']) ? $_REQUEST['q'] : null;
 
-    $cm_member_ids = db_get_field("SELECT cm_member_ids FROM ?:users WHERE user_id = ?i", $auth['user_id']);
-    $cm_member_ids = explode(',', $cm_member_ids);
+    $cm_member_ids = fn_as_category_managers_get_member_ids($auth['user_id']);
     $exclude_user_ids = db_get_fields("SELECT user_id FROM ?:users WHERE user_id NOT IN (?a)", $cm_member_ids);
 
     $params = array(

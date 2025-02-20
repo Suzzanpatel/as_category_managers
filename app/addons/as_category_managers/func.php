@@ -171,7 +171,7 @@ function fn_as_category_managers_update_profile($action, $user_data, $current_us
         }
 
         if ($user_data['is_cm_leader'] == 'Y') {
-            $cm_member_ids = fn_as_category_managers_get_member_ids($user_data['user_id']);
+            $cm_member_ids = explode(',', $user_data['cm_member_ids']) ?? [];
 
             if (!empty($cm_member_ids)) {
                 $old_cm_member_ids = fn_as_category_managers_get_member_ids($user_data['user_id']);

@@ -30,8 +30,22 @@ function fn_as_category_managers_install()
                 "manage_product_premoderation" => "Y",
             ],
         ];
-    
         fn_update_usergroup($cm_usergroup_data, 0, DESCR_SL);
+
+        $cit_usergroup_data = [
+            "usergroup" => "Addon: Central Invoice Team",
+            "type" => "A",
+            "status" => "A",
+            "privileges" => [
+                "edit_order" => "Y",
+                "update_order_details" => "Y",
+                "delete_orders" => "Y",
+                "change_order_status" => "Y",
+                "create_order" => "Y",
+                "view_orders" => "Y",
+            ],
+        ];
+        fn_update_usergroup($cit_usergroup_data, 0, DESCR_SL);
     }
 }
 
@@ -39,9 +53,13 @@ function fn_as_category_managers_uninstall()
 {
     // Delete usergroup
     $cm_usergroup_id = db_get_row("SELECT usergroup_id FROM ?:usergroup_descriptions WHERE usergroup = ?s", "Addon: Category Manager");
-
     if (!empty($cm_usergroup_id) && fn_is_usergroup_exists($cm_usergroup_id['usergroup_id'])) {
         fn_delete_usergroups(explode(",", $cm_usergroup_id['usergroup_id']));
+    }
+
+    $cit_usergroup_id = db_get_row("SELECT usergroup_id FROM ?:usergroup_descriptions WHERE usergroup = ?s", "Addon: Central Invoice Team");
+    if (!empty($cit_usergroup_id) && fn_is_usergroup_exists($cit_usergroup_id['usergroup_id'])) {
+        fn_delete_usergroups(explode(",", $cit_usergroup_id['usergroup_id']));
     }
 }
 

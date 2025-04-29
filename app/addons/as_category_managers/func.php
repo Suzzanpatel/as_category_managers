@@ -614,3 +614,19 @@ function fn_as_category_managers_update_order_details_post($params, $order_info,
         fn_change_order_status($order_info['order_id'], 'A', 'O');
     }
 }
+
+function fn_as_category_managers_change_order_status_post($order_id, $status_to, $status_from, $force_notification, $place_order, $order_info, $edp_data)
+{
+    $cm_user_data = fn_as_category_managers_get_cm_user_data();
+    $is_root = $cm_user_data['is_root'] ?? false;
+    $is_cm_user = $cm_user_data['is_cm_user'] ?? false;
+    $is_cm_leader = $cm_user_data['is_cm_leader'] ?? false;
+
+    if (AREA == 'A' && $is_root == "N" && $is_cm_user == "Y" && $is_cm_leader == "Y") {
+        // From 'O: Receiver' or 'G: On-Hold' to 'A: In Process'
+        if (($status_from == 'O' || $status_from == 'G') && $status_to == 'A') {
+            // Continue to 'Approval Authority'
+            db_query("UPDATE ?:orders SET splitting_status = 'W' WHERE order_id = ?i", $order_id);
+        }
+    }
+}

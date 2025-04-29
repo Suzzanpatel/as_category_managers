@@ -19,4 +19,5 @@ fn_register_hooks(
     'vendor_data_premoderation_approve_products_pre',
     'vendor_data_premoderation_disapprove_products_pre',
     'update_order_details_post',
+    'change_order_status_post',
 );

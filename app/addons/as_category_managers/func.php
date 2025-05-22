@@ -611,7 +611,10 @@ function fn_as_category_managers_get_orders($params, $fields, $sortings, &$condi
 
 function fn_as_category_managers_update_order_details_post($params, $order_info, $edp_data, $force_notification) {
     if (!empty($params['update_order']['assigned_cm_member_id']) && $order_info['status'] == 'O') {
+        $order_id = $order_info['order_id'];
+        
         fn_change_order_status($order_info['order_id'], 'A', 'O');
+        db_query("UPDATE ?:orders SET show_in_aa = 'N' WHERE order_id = ?i", $order_id);
     }
 }
 

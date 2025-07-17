@@ -16,14 +16,6 @@ if ($mode == 'details') {
     ];
 
     $insurance_terms = [
-        'ameya_to_bear' => 'Ameya To Bear',
-        'charge_to_customer_0_5' => 'Charge To Customer 0.5%',
-        'charge_to_customer_1_0' => 'Charge To Customer 1.0%',
-        'customer_to_bear_self_pickup' => 'Customer To Bear(self pick up)',
-        'customer_to_bear_policy' => 'Customer To Bear(policy/He will take care)'
-    ];
-
-    $payment_terms = [
         'advance' => 'Advance',
         'advance_50_before_dispatch' => '50% Advance Reliased Before Dispatch',
         'balance' => 'Balance',
@@ -55,6 +47,14 @@ if ($mode == 'details') {
         'credit_120_days' => '120 Days',
         'foc_sending' => 'FOC Sending',
         'advance_80_20_on_delivery' => '80% Advance 20% against delivery'
+    ];
+
+    $payment_terms = [
+        'ameya_to_bear' => 'Ameya To Bear',
+        'charge_to_customer_0_5' => 'Charge To Customer 0.5%',
+        'charge_to_customer_1_0' => 'Charge To Customer 1.0%',
+        'customer_to_bear_self_pickup' => 'Customer To Bear(self pick up)',
+        'customer_to_bear_policy' => 'Customer To Bear(policy/He will take care)'
     ];
 
     Tygh::$app['view']->assign('freight_terms', $freight_terms);

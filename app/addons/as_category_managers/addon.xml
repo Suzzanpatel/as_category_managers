@@ -31,8 +31,18 @@
         <item for="install">ALTER TABLE ?:users ADD cm_category_ids TEXT DEFAULT '';</item>
         <item for="uninstall">ALTER TABLE ?:users DROP cm_category_ids;</item>
 
-        <item for="install">ALTER TABLE ?:orders ADD assigned_cm_member_id mediumint DEFAULT NULL;</item>
-        <item for="uninstall">ALTER TABLE ?:orders DROP assigned_cm_member_id;</item>
+        <item for="install">ALTER TABLE `?:orders`
+            ADD assigned_cm_member_id mediumint DEFAULT NULL,
+            ADD COLUMN `freight_terms` VARCHAR(100) NULL,
+            ADD COLUMN `payment_terms` VARCHAR(100) NULL,
+            ADD COLUMN `insurance_terms` VARCHAR(100) NULL;
+        </item>
+        <item for="uninstall">ALTER TABLE ?:orders
+            DROP assigned_cm_member_id,
+            DROP COLUMN `freight_terms`,
+            DROP COLUMN `payment_terms`,
+            DROP COLUMN `insurance_terms`;
+        </item>
 
         <item for="install">ALTER TABLE ?:order_details ADD product_main_category_id TEXT DEFAULT '';</item>
         <item for="uninstall">ALTER TABLE ?:order_details DROP product_main_category_id;</item>

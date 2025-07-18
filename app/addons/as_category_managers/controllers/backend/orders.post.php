@@ -4,6 +4,16 @@ use Tygh\Tygh;
 
 if (!defined('BOOTSTRAP')) { die('Access denied'); }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if ($mode == 'upload_po_document') {
+        as_cm_upload_order_document($_REQUEST['order_id'], $_FILES, 'po', 'po_documents');
+    }
+
+    if ($mode == 'delete_po_document') {
+        as_cm_delete_order_document($_REQUEST['order_id'], 'po');
+    }
+}
+
 if ($mode == 'details') {
     $freight_terms = [
         'to_pay_dd' => 'To Pay (DD)',

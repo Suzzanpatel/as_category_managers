@@ -633,3 +633,5 @@ function fn_as_category_managers_change_order_status_post($order_id, $status_to,
         }
     }
 }
+
+require_once __DIR__ . '/document.functions.php';

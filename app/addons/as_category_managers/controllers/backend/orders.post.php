@@ -5,6 +5,46 @@ use Tygh\Tygh;
 if (!defined('BOOTSTRAP')) { die('Access denied'); }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if ($mode == 'set_shipping_address') {
+        $order_id = $_REQUEST['order_id'] ?? 0;
+        $profile_id = $_REQUEST['profile_id'] ?? 0;
+
+        if (!empty($profile_id)) {
+            $order_info = fn_get_order_info($order_id);
+            $user_info = fn_get_user_info($order_info['user_id'], true, $profile_id);
+            
+            db_query(
+                "UPDATE ?:orders SET `s_firstname` = ?s, `s_lastname` = ?s, `s_address` = ?s, `s_address_2` = ?s, `s_city` = ?s, `s_county` = ?s, `s_state` = ?s, `s_country` = ?s, `s_zipcode` = ?s, `s_phone` = ?s, `s_address_type` = ?s, `profile_id` = ?s WHERE order_id = ?i",
+                $user_info['s_firstname'], 
+                $user_info['s_lastname'],
+                $user_info['s_address'],
+                $user_info['s_address_2'],
+                $user_info['s_city'],
+                $user_info['s_county'],
+                $user_info['s_state'],
+                $user_info['s_country'],
+                $user_info['s_zipcode'],
+                $user_info['s_phone'],
+                $user_info['s_address_type'],
+                $profile_id,
+                $order_id
+            );
+        }
+
+        fn_set_notification('N', __('notice'), __('text_shipping_address_updated'));
+        return array(CONTROLLER_STATUS_REDIRECT, 'orders.details?order_id=' . $order_id);
+    }
+
+    if ($mode == 'create_new_profile') {
+        $order_id = $_REQUEST['order_id'] ?? 0;
+        $user_id = $_REQUEST['user_id'] ?? 0;
+        $user_data = $_REQUEST['user_data'];
+        $user_data['profile_id'] = 0;
+
+        $profile_id = fn_update_user_profile($user_id, $user_data);
+        return array(CONTROLLER_STATUS_REDIRECT, 'orders.details?order_id=' . $order_id);
+    }
+
     if ($mode == 'upload_po_document') {
         as_cm_upload_order_document($_REQUEST['order_id'], $_FILES, 'po', 'po_documents');
     }
@@ -15,6 +55,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if ($mode == 'details') {
+    // Get variable from main controller
+    $order_info = Tygh::$app['view']->getTemplateVars('order_info');
+    
+    $user_profiles = fn_get_user_profiles($order_info['user_id']);
+    
+    // Merge user info with profiles
+    if (!empty($user_profiles)) {
+        foreach ($user_profiles as $key => $profile) {
+            $user_info = fn_get_user_info($order_info['user_id'], true, $profile['profile_id']);
+            $user_profiles[$key] = array_merge($profile, $user_info);
+        }
+    }
+
     $freight_terms = [
         'to_pay_dd' => 'To Pay (DD)',
         'to_pay_gd' => 'To Pay (GD)',
@@ -67,6 +120,10 @@ if ($mode == 'details') {
         'customer_to_bear_policy' => 'Customer To Bear(policy/He will take care)'
     ];
 
+    Tygh::$app['view']->assign('user_profiles', $user_profiles);
+    Tygh::$app['view']->assign('countries', fn_get_simple_countries(true, CART_LANGUAGE));
+    Tygh::$app['view']->assign('states', fn_get_all_states());
+    
     Tygh::$app['view']->assign('freight_terms', $freight_terms);
     Tygh::$app['view']->assign('insurance_terms', $insurance_terms);
     Tygh::$app['view']->assign('payment_terms', $payment_terms);

@@ -1,0 +1,1 @@
+{script src="js/addons/as_category_managers/main.js"}

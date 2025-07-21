@@ -26,6 +26,11 @@
                     <option value="{$key}" {if $order_info.insurance_terms == $key}selected="selected"{/if}>{$term}</option>
                 {/foreach}
             </select>
+
+            <div id="insurance_policy_number_wrapper" class="{if !$order_info.insurance_policy_number}hidden{/if}" style="margin-top: 10px;">
+                <label for="policy_number">Policy Number</label>
+                <input type="text" name="update_order[insurance_policy_number]" id="policy_number" class="input-full form-control" value="{$order_info.insurance_policy_number|default:''}">
+            </div>
         </div>
     </div>
 </div>

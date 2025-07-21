@@ -616,6 +616,10 @@ function fn_as_category_managers_update_order_details_post($params, $order_info,
         fn_change_order_status($order_info['order_id'], 'A', 'O');
         db_query("UPDATE ?:orders SET show_in_aa = 'N' WHERE order_id = ?i", $order_id);
     }
+
+    if ($params['update_order']['insurance_terms'] != 'customer_to_bear_policy') {
+        db_query("UPDATE ?:orders SET insurance_policy_number = ?s WHERE order_id = ?i", '', $order_info['order_id']);
+    }
 }
 
 function fn_as_category_managers_change_order_status_post($order_id, $status_to, $status_from, $force_notification, $place_order, $order_info, $edp_data)

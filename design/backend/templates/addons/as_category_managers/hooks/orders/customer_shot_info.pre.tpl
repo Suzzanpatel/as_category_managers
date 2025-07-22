@@ -1,3 +1,4 @@
+{*********************************************************
 {if $auth.is_cm_user == "Y"}
 <div class="well orders-right-pane">
     {include file="common/subheader.tpl" title="PO Document"}
@@ -32,3 +33,4 @@
     </form>
 </div>
 {/if}
+**********************************************************}

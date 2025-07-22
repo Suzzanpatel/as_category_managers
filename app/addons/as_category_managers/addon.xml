@@ -37,7 +37,11 @@
             ADD COLUMN `payment_terms` VARCHAR(100) NULL,
             ADD COLUMN `insurance_terms` VARCHAR(100) NULL,
             ADD COLUMN `insurance_policy_number` VARCHAR(100) NULL,
-            ADD COLUMN `po_document_path` TEXT NULL;
+            ADD COLUMN `po_document_path` TEXT NULL,
+            ADD COLUMN `cm_notes` TEXT NULL,
+            ADD COLUMN `wh_notes` TEXT NULL,
+            ADD COLUMN `cit_notes` TEXT NULL,
+            ADD COLUMN `aa_notes` TEXT NULL;
         </item>
         <item for="uninstall">ALTER TABLE ?:orders
             DROP assigned_cm_member_id,
@@ -45,7 +49,11 @@
             DROP COLUMN `payment_terms`,
             DROP COLUMN `insurance_terms`,
             DROP COLUMN `insurance_policy_number`,
-            DROP COLUMN `po_document_path`;
+            DROP COLUMN `po_document_path`,
+            DROP COLUMN `cm_notes`,
+            DROP COLUMN `wh_notes`,
+            DROP COLUMN `cit_notes`,
+            DROP COLUMN `aa_notes`;
         </item>
 
         <item for="install">ALTER TABLE ?:order_details ADD product_main_category_id TEXT DEFAULT '';</item>

@@ -607,6 +607,12 @@ function fn_as_category_managers_get_orders($params, $fields, $sortings, &$condi
             $condition .= db_quote(" AND ?:orders.assigned_cm_member_id = ?i", Tygh::$app['session']['auth']['user_id']);
         }
     }
+
+    if (AREA == 'A') {
+        if (isset($params['assigned_warehouse_id']) && !empty($params['assigned_warehouse_id'])) {
+            $condition .= db_quote(" OR ?:orders.assigned_warehouse_id = ?i", (int)$params['assigned_warehouse_id']);
+        }
+    }
 }
 
 function fn_as_category_managers_update_order_details_post($params, $order_info, $edp_data, $force_notification) {

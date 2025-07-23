@@ -21,6 +21,19 @@
         <email>support@arenasoftwares.com</email>
     </author>
 
+    <settings>
+        <sections>
+            <section id="general">
+                <items>
+                    <item id="approve_status">
+                        <type>selectbox</type>
+                        <default_value></default_value>
+                    </item>
+                </items>
+            </section>
+        </sections>
+    </settings>
+
     <queries>
         <item for="install">ALTER TABLE ?:users ADD is_cm_user CHAR(1) NOT NULL DEFAULT 'N';</item>
         <item for="uninstall">ALTER TABLE ?:users DROP is_cm_user;</item>

@@ -63,6 +63,20 @@ function fn_as_category_managers_uninstall()
     }
 }
 
+function fn_settings_variants_addons_as_category_managers_approve_status()
+{
+    $statuses_array = db_get_array("SELECT c.status, s.description FROM ?:status_descriptions AS s INNER JOIN ?:statuses AS c ON (s.status_id = c.status_id) WHERE c.type = ?s", "O");	
+
+	foreach ($statuses_array as $k => $status) {
+		if ($k == 0) {
+			$statuses[0] = "Select status";
+		}		
+		$statuses[$status['status']] = $status['description'];
+	}
+
+	return $statuses;
+}
+
 /**
  * Get category managers user data
  * 

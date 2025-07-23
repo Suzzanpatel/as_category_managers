@@ -1,5 +1,6 @@
 <?php
 
+use Tygh\Registry;
 use Tygh\Tygh;
 
 if (!defined('BOOTSTRAP')) { die('Access denied'); }
@@ -120,6 +121,7 @@ if ($mode == 'details') {
         'customer_to_bear_policy' => 'Customer To Bear(policy/He will take care)'
     ];
 
+    Tygh::$app['view']->assign('approved_status', Registry::get('addons.as_category_managers.approve_status'));
     Tygh::$app['view']->assign('user_profiles', $user_profiles);
     Tygh::$app['view']->assign('countries', fn_get_simple_countries(true, CART_LANGUAGE));
     Tygh::$app['view']->assign('states', fn_get_all_states());

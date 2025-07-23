@@ -12,6 +12,10 @@ msgctxt "Addons::description::as_category_managers"
 msgid "ArenaSoftwareS: Category Managers"
 msgstr "ArenaSoftwareS: Category Managers"
 
+msgctxt "SettingsOptions::as_category_managers::approve_status"
+msgid "Approve status"
+msgstr "Approve status"
+
 msgctxt "Languages::as_category_managers.category_manager"
 msgid "Category Manager"
 msgstr "Category Manager"

@@ -433,13 +433,13 @@ function fn_as_category_managers_get_cm_user_by_category($category_id)
  * 
  * @return array
  */
-function fn_as_category_managers_get_member_ids(int $leader_id, string $return_type = 'array') : array|string
+function fn_as_category_managers_get_member_ids(int $leader_id, string $return_type = 'array')
 {
     $member_list = db_get_fields("SELECT member_id FROM ?:cm_members WHERE leader_id = ?i", $leader_id);
     return $return_type == 'array' ? $member_list : implode(',', $member_list);
 }
 
-function fn_as_category_managers_get_category_ids($return_type = 'array') : array|string
+function fn_as_category_managers_get_category_ids($return_type = 'array')
 {
     $cm_user_data = fn_as_category_managers_get_cm_user_data();
     $is_root = $cm_user_data['is_root'] ?? false;
